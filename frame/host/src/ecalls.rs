@@ -52,6 +52,7 @@ impl EnclaveConnector {
 
         let mut ret = EnclaveStatus::default();
 
+        let t0 = std::time::SystemTime::now();
         let status = unsafe {
             ecall_entry_point(
                 self.eid,
@@ -64,8 +65,9 @@ impl EnclaveConnector {
                 &mut output_len,
             )
         };
-        let t2 = std::time::SystemTime::now();
-        println!("t2: {:?}", t2);
+        let t1 = std::time::SystemTime::now();
+        println!("t0: {:?}", t0);
+        println!("t1: {:?}", t1);
 
         if status != sgx_status_t::SGX_SUCCESS {
             return Err(FrameHostError::SgxStatus {
