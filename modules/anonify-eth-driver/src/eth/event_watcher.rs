@@ -16,7 +16,7 @@ use frame_common::{
     traits::*,
 };
 use frame_host::engine::HostEngine;
-use log::{debug, info, error, warn};
+use log::{debug, error, info, warn};
 use sgx_types::sgx_enclave_id_t;
 use std::{cmp::Ordering, path::Path};
 use web3::types::{Address, Log};
@@ -49,13 +49,15 @@ impl Watcher for EventWatcher {
         &self,
         eid: sgx_enclave_id_t,
     ) -> Result<Option<Vec<UpdatedState<S>>>> {
-        let enclave_updated_state = self
+        let event_logs = self
             .contract
             .get_event(self.cache.clone(), self.contract.address())
-            .await?
-            .into_enclave_log()
-            .insert_enclave(eid)
-            .save_cache(self.contract.address());
+            .await?;
+        let t_start = std::time::SystemTime::now();
+        let enclave_updated_state = event_logs.into_enclave_log().insert_enclave(eid);
+        let t_end = std::time::SystemTime::now();
+        println!("t_start: {:?}\n, t_end: {:?}", t_start, t_end);
+        let enclave_updated_state = enclave_updated_state.save_cache(self.contract.address());
 
         Ok(enclave_updated_state.updated_states())
     }

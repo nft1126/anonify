@@ -497,7 +497,11 @@ async fn test_integration_eth_approve() {
     let amount = U64::from_raw(30);
     let spender = other_access_policy.into_account_id();
     let approve_state = approve { amount, spender };
+
+    let t0 = std::time::SystemTime::now();
+
     let encrypted_command = EciesCiphertext::encrypt(&pubkey, approve_state.encode()).unwrap();
+    let t1 = std::time::SystemTime::now();
     let receipt = dispatcher
         .send_command::<CallName, _>(
             my_access_policy.clone(),
@@ -509,6 +513,8 @@ async fn test_integration_eth_approve() {
         .await
         .unwrap();
     println!("receipt: {:?}", receipt);
+    println!("t0: {:?}", t0);
+    println!("t1: {:?}", t1);
 
     // Update state inside enclave
     dispatcher.fetch_events::<U64>().await.unwrap();
